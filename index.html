@@ -164,31 +164,39 @@ df</code></pre>
 ## 1 2 aa  TRUE
 ## 2 3 bb FALSE
 ## 3 5 cc  TRUE</code></pre>
+<pre class="text"><code>df$runif &lt;- runif(3)
+df</code></pre>
+<pre><code>##   n  s     b     runif
+## 1 2 aa  TRUE 0.1212112
+## 2 3 bb FALSE 0.5202818
+## 3 5 cc  TRUE 0.8900643</code></pre>
 </section><section id="data-frames-cont" class="slide level2">
 <h1>Data Frames (cont)</h1>
 <pre class="text"><code>str(df)</code></pre>
-<pre><code>## 'data.frame':    3 obs. of  3 variables:
-##  $ n: num  2 3 5
-##  $ s: Factor w/ 3 levels &quot;aa&quot;,&quot;bb&quot;,&quot;cc&quot;: 1 2 3
-##  $ b: logi  TRUE FALSE TRUE</code></pre>
+<pre><code>## 'data.frame':    3 obs. of  4 variables:
+##  $ n    : num  2 3 5
+##  $ s    : Factor w/ 3 levels &quot;aa&quot;,&quot;bb&quot;,&quot;cc&quot;: 1 2 3
+##  $ b    : logi  TRUE FALSE TRUE
+##  $ runif: num  0.121 0.52 0.89</code></pre>
 <pre class="text"><code>summary(df)</code></pre>
-<pre><code>##        n          s         b          
-##  Min.   :2.000   aa:1   Mode :logical  
-##  1st Qu.:2.500   bb:1   FALSE:1        
-##  Median :3.000   cc:1   TRUE :2        
-##  Mean   :3.333          NA's :0        
-##  3rd Qu.:4.000                         
-##  Max.   :5.000</code></pre>
+<pre><code>##        n          s         b               runif       
+##  Min.   :2.000   aa:1   Mode :logical   Min.   :0.1212  
+##  1st Qu.:2.500   bb:1   FALSE:1         1st Qu.:0.3207  
+##  Median :3.000   cc:1   TRUE :2         Median :0.5203  
+##  Mean   :3.333          NA's :0         Mean   :0.5105  
+##  3rd Qu.:4.000                          3rd Qu.:0.7052  
+##  Max.   :5.000                          Max.   :0.8901</code></pre>
 </section><section id="wcgw-1" class="slide level2">
 <h1>WCGW</h1>
 <p>Type conversions. One common issue is types are incorrect for a given application.</p>
 <pre class="text"><code>df$n &lt;- as.numeric(df$n)
 df$s &lt;- as.character(df$s)
 str(df)</code></pre>
-<pre><code>## 'data.frame':    3 obs. of  3 variables:
-##  $ n: num  2 3 5
-##  $ s: chr  &quot;aa&quot; &quot;bb&quot; &quot;cc&quot;
-##  $ b: logi  TRUE FALSE TRUE</code></pre>
+<pre><code>## 'data.frame':    3 obs. of  4 variables:
+##  $ n    : num  2 3 5
+##  $ s    : chr  &quot;aa&quot; &quot;bb&quot; &quot;cc&quot;
+##  $ b    : logi  TRUE FALSE TRUE
+##  $ runif: num  0.121 0.52 0.89</code></pre>
 <pre class="text"><code>?mean
 apropos('mean')</code></pre>
 <pre><code>##  [1] &quot;.colMeans&quot;        &quot;.rowMeans&quot;        &quot;colMeans&quot;        
@@ -452,7 +460,7 @@ table(unif_test)</code></pre>
 <h1>WCGW</h1>
 <p>In real data, NAs and NULLS are pervasive. Many functions handle these properly, e.g. max(5, NA) = NA.</p>
 <pre class="text"><code>sum(unif_sample, na.rm=TRUE)</code></pre>
-<pre><code>## [1] 53.17812</code></pre>
+<pre><code>## [1] 53.00453</code></pre>
 <p>Writing for loops is possible, but slow. Avoid when possible</p>
 <pre class="text"><code>for (i in 1:length(unif_sample)) {
   unif_test[i] &lt;- unif_sample[i] &gt; .50 

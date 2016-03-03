@@ -107,6 +107,10 @@ df <- data.frame(n, s, b)
 df
 ```
 
+```{r column_addition}
+df$runif <- runif(3)
+df
+```
 
 ## Data Frames (cont)
 
