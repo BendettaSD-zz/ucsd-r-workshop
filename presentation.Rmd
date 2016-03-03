@@ -1,0 +1,337 @@
+---
+title: "R Workshop UCSD"
+author: "Ben Wilson"
+date: "March 3, 2016"
+output: 
+  revealjs::revealjs_presentation:
+    theme: black
+    reveal_options:
+      slideNumber: true
+      previewLinks: true
+    highlight: pygments
+    stylesheet: custom.css
+---
+
+```{r setup, include=FALSE}
+knitr::dep_prev()
+knitr::opts_chunk$set(
+  echo=TRUE,
+  tidy=FALSE,
+  highlight=FALSE,
+  cache=TRUE,
+  messages=FALSE,
+  warnings=FALSE,
+  fig.height=4
+  )
+
+r <- getOption("repos")
+  r["CRAN"] <- "http://cran.cnr.berkeley.edu/"
+  options(repos = r)
+```
+
+# R 101
+
+## Content Overview
+
+  - R & Rstudio
+  - dplyr
+  - ggplot2
+  - Rmarkdown
+  - Bayesian Belief Networks
+
+# Why R?
+
+## Why R?
+
+  - http://pypl.github.io/PYPL.html
+    - Ranked 10 in popularity (Mar 2016)  
+
+  - http://blog.revolutionanalytics.com/2015/11/new-surveys-show-continued-popularity-of-r.html
+    - Skill second only to data analytics (roughly tied with python)
+
+
+## What is R?
+
+R is a language and environment for statistical computing and graphics.
+
+- Compared to python
+    - Built for data analysis instead of a general programming language
+    - Python + Pandas are a similar tool kit
+    - Easily cross platform
+    
+- Compared to Matlab
+    - Built for 'data.frames' vs matrices
+    - More flexible with data types
+    - Free
+    
+    
+## When Should I Use R?
+
+R is useful for investigating data, creating models, and reports among other things.
+
+Personally I use R to investigate new data, prototype models, and do ad-hoc analysis.
+
+http://shiny.rstudio.com/gallery/
+
+
+# Base R
+
+## Base R
+
+```{r base_R}
+2 + 3
+
+8 * 6
+
+8 * 6 == 5
+
+cos(pi)
+```
+
+
+## Data Frames
+
+```{r data_frames}
+n <- c(2, 3, 5) 
+s <- c("aa", "bb", "cc") 
+b <- c(TRUE, FALSE, TRUE) 
+df <- data.frame(n, s, b)
+
+df
+```
+
+
+## Data Frames (cont)
+
+```{r str}
+str(df)
+```
+
+```{r summary}
+summary(df)
+```
+
+
+# Reading Data into R
+
+## Reading Data into R
+
+Data provided by https://archive.ics.uci.edu/ml/datasets/Online+News+Popularity. Goal is to predict number of shares from metadata of a link on mashable.com.
+
+
+```{r read_csv}
+df <- read.csv('data/OnlineNewsPopularity.csv')
+nrow(df)
+```
+
+
+K. Fernandes, P. Vinagre and P. Cortez. A Proactive Intelligent Decision Support System for Predicting the Popularity of Online News. Proceedings of the 17th EPIA 2015 - Portuguese Conference on Artificial Intelligence, September, Coimbra, Portugal.
+
+
+## Names
+
+```{r names_df}
+names(df)
+```
+
+
+## Investigate Data
+
+```{r summary_df}
+summary(df)
+```
+
+
+## Single Column Investigation
+
+```{r shares}
+head(df$shares)
+mean(df$shares)
+max(df$shares)
+```
+
+## Single Column Investigation
+```{r hist}
+hist(df$title_sentiment_polarity)
+```
+
+
+## Correlation Investigation
+```{r corr}
+plot(df[1:500, c("num_hrefs", "title_sentiment_polarity", "is_weekend", "shares")])
+```
+
+# Packages
+
+## Packages in R
+
+R has a built in package manager. Packages (and R source code, binaries) are hosted on a distributed network (CRAN). http://cran.us.r-project.org/ . There are currently more than 8000 packages available + many more on github.
+
+To install packages one uses the command install.packages() in the R terminal
+
+## Install a couple of packages
+
+Two packages which enable data manipulation and visualization are dplyr and ggplot2. To install them simply type
+
+```{r install, eval=FALSE}
+install.packages(c('dplyr', 'ggplot2'))
+```
+
+```{r load_package, results=FALSE}
+library(dplyr)
+library(ggplot2)
+```
+
+## Dplyr
+
+Dplyr introduces (at least) two ideas to data manipulation in R.
+
+  - Pipes
+```{r pipes}
+  df$shares %>% max()
+```  
+  - Verbs
+```{r verbs}
+  df %>% summarize(n=n())
+```
+
+
+## Group By
+
+Dplyr also introduces many SQL-like verbs in an accessible fashion.
+
+```{r group_by}
+df %>% 
+  group_by(is_weekend) %>% 
+  summarize(
+    n=n(),
+    shares_mean=mean(shares),
+    shares_max=max(shares)
+  )
+```
+
+
+
+# GGPlot2
+
+## GGPlot2
+
+ggplot2 is a plotting package which enables extremely customizable graphs in an intuitive way.
+
+```{r ggplot, fig.height=3}
+ggplot() +
+  geom_histogram(
+    data=df,
+    aes(x=title_sentiment_polarity)
+  )
+```
+
+
+# Machine Learning
+
+## Machine Learning Packages
+
+There are many packages devoted to machine learning in R. Some packages for those interested
+
+  - caret
+  - e1071 (a collection of methods)
+  - nnet
+  - gbm
+  - RWeka
+  - party
+
+
+## Sampling Data
+
+Splitting the data into testing and training sets is essential.
+
+```{r data_split}
+set.seed(290875)
+
+train_rows <- 
+  sample(nrow(df), nrow(df) * .10)
+
+train_df <-
+  df %>%
+  slice(train_rows)
+
+test_df <-
+  df %>%
+  slice(-train_rows)
+
+head(train_rows)
+```
+
+
+## Running a random forest
+
+```{r party_install, eval=FALSE}
+install.packages('party')
+library(party)
+```
+
+
+```{r party, echo=FALSE, results='hide'}
+library(party)
+```
+
+```{r rf}
+df_cforest <- 
+  cforest(
+    shares ~ avg_positive_polarity + avg_negative_polarity + global_subjectivity + global_sentiment_polarity + global_rate_positive_words + global_rate_negative_words, 
+    data=train_df,
+    control = cforest_unbiased(mtry = 2, ntree = 50)
+  )
+```
+
+## Predicting New Values
+
+```{r predict}
+test_df <-
+  test_df[1:1000, ]
+
+test_df$prediction <-
+  Predict(df_cforest, newdata=test_df)
+
+sqrt(mean((test_df$shares - test_df$prediction)^2))
+mean(abs(test_df$shares - test_df$prediction))
+```
+
+## Plotting The Error
+
+```{r warning_trick, echo=FALSE, results='hide'}
+options(warn=-1)
+```
+
+
+```{r predict_plot_code, warnings=FALSE, results='hide', fig.height=4}
+test_df$is_weekend <- as.factor(test_df$is_weekend)
+
+ggplot() +
+  geom_density(
+    data=test_df,
+    aes(
+      x=shares-prediction, 
+      fill=is_weekend, 
+      group=is_weekend, 
+      color=is_weekend
+    ),
+    alpha=.4
+  ) +
+  xlim(-5000, 5000) +
+  theme_bw()
+```
+
+
+## Plotting the Error
+```{r predict_plot, echo=FALSE, warnings=FALSE, fig.height=4}
+test_df$is_weekend <- as.factor(test_df$is_weekend)
+ggplot() +
+  geom_density(
+    data=test_df,
+    aes(x=shares-prediction, fill=is_weekend, group=is_weekend, color=is_weekend),
+    alpha=.4
+  ) +
+  xlim(-5000, 5000) +
+  theme_bw()
+```
