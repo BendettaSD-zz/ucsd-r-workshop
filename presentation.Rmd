@@ -34,10 +34,10 @@ r <- getOption("repos")
 ## Content Overview
 
   - R & Rstudio
-  - dplyr
-  - ggplot2
-  - Rmarkdown
-  - Bayesian Belief Networks
+  - Base R
+  - Reading Data
+  - Packages
+  - Machine Learning
 
 # Why R?
 
@@ -74,6 +74,13 @@ Personally I use R to investigate new data, prototype models, and do ad-hoc anal
 http://shiny.rstudio.com/gallery/
 
 
+## WCGW
+
+What could go wrong?
+
+  - In memory calculations
+  
+
 # Base R
 
 ## Base R
@@ -109,6 +116,21 @@ str(df)
 
 ```{r summary}
 summary(df)
+```
+
+## WCGW
+
+Type conversions. One common issue is types are incorrect for a given application.
+
+```{r as.numeric}
+df$n <- as.numeric(df$n)
+df$s <- as.character(df$s)
+str(df)
+```
+
+```{r apropos}
+?mean
+apropos('mean')
 ```
 
 
@@ -161,13 +183,79 @@ hist(df$title_sentiment_polarity)
 plot(df[1:500, c("num_hrefs", "title_sentiment_polarity", "is_weekend", "shares")])
 ```
 
+## WCGW
+
+Delimited files are the most commin file ingestion type. A generic reader is read.table.
+
+```{r read_table, eval=FALSE}
+tab_df <- read.table(
+  'my_files.tab', 
+  sep='\t', 
+  header=FALSE, 
+  quote="'"
+)
+```
+
+```{r names, eval=FALSE}
+names(tab_df) <- c('foo', 'bar', 'baz')
+```
+
+# Functions and Logic
+
+## Functions
+
+```{r function_example, error=TRUE}
+square <- function(x){
+  return(x^2)
+}
+
+square(5)
+
+square('foo')
+
+square(NA)
+```
+
+## Logic
+
+```{r logic}
+if (5 > 10){
+  print('baz')
+}
+```
+
+
+```{r vectorized}
+unif_sample <- runif(100)
+
+unif_test <- ifelse(unif_sample > .50, 'high', 'low')
+
+table(unif_test)
+```
+
+
+## WCGW
+
+In real data, NAs and NULLS are pervasive. Many functions handle these properly, e.g. max(5, NA) = NA. 
+
+```{r na}
+sum(unif_sample, na.rm=TRUE)
+```
+
+Writing for loops is possible, but slow. Avoid when possible
+```{r loop}
+for (i in 1:length(unif_sample)) {
+  unif_test[i] <- unif_sample[i] > .50 
+}
+```
+
 # Packages
 
 ## Packages in R
 
-R has a built in package manager. Packages (and R source code, binaries) are hosted on a distributed network (CRAN). http://cran.us.r-project.org/ . There are currently more than 8000 packages available + many more on github.
+R has a built in package manager. Packages (and R source code, binaries) are hosted on a distributed network (CRAN). http://cran.us.r-project.org/ . There are currently more than 8000 packages available + many more on github. Packages can be written in R, C++, Java and many more languages.
 
-To install packages one uses the command install.packages() in the R terminal
+To install packages one uses the command install.packages() in the R terminal.
 
 ## Install a couple of packages
 
@@ -210,6 +298,14 @@ df %>%
   )
 ```
 
+## WCGW
+
+Sometimes a package isn't what you want.
+
+```{r undo, eval=FALSE}
+detach("package:idontwantthis", unload=TRUE)
+remove.packages('idontwantthiseither')
+```
 
 
 # GGPlot2
@@ -225,6 +321,19 @@ ggplot() +
     aes(x=title_sentiment_polarity)
   )
 ```
+
+
+## WCGW
+
+Greater than 8000 packages to choose. Lots of freedom and subtle differences. 
+
+Vignettes provided a lot of information for a package.
+
+Ex: https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html
+
+Ex: http://docs.ggplot2.org/current/
+
+Reading r-bloggers + stack-overflow helps as well.
 
 
 # Machine Learning
@@ -304,7 +413,7 @@ options(warn=-1)
 ```
 
 
-```{r predict_plot_code, warnings=FALSE, results='hide', fig.height=4}
+```{r predict_plot_code, warnings=FALSE, results='hide', fig.show='hide'}
 test_df$is_weekend <- as.factor(test_df$is_weekend)
 
 ggplot() +
@@ -319,7 +428,8 @@ ggplot() +
     alpha=.4
   ) +
   xlim(-5000, 5000) +
-  theme_bw()
+  theme_bw() + 
+  ggtitle("Shares - Prediction ")
 ```
 
 
@@ -333,5 +443,17 @@ ggplot() +
     alpha=.4
   ) +
   xlim(-5000, 5000) +
-  theme_bw()
+  theme_bw() + 
+  ggtitle("Shares - Prediction")
 ```
+
+
+## WCGW
+
+  - In memory calculations
+  
+  - Column typing
+  
+  - Curse of dimensionality 
+  
+  
